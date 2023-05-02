@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <SDL.h>
+#include <cmath>
 
 typedef float    f32;
 typedef double   f64;
@@ -17,6 +18,36 @@ typedef size_t   usize;
 
 const int screenWidth = 1024;
 const int screenHeight = 768;
+
+class Vec3 {
+    f32 x;
+    f32 y;
+    f32 z;
+    Vec3(f32 _x, f32 _y, f32 _z) {
+        x = _x;
+        y = _y;
+        z = _z;
+    };
+    void Normalize() {
+        f32 magnitude = sqrtf(x*x + y*y + z*z);
+        x = x/magnitude;
+        y = y/magnitude;
+        z = z/magnitude;
+    }
+};
+class Triangle {
+    Vec3 v1;
+    Vec3 v2;
+    Vec3 v3;
+    Triangle(Vec3 _v1, Vec3 _v2, Vec3 _v3) {
+        v1 = _v1;
+        v2 = _v2;
+        v3 = _v3;
+    };
+    Vec3 Intersection (Vec3 inputVec3) {
+        
+    };
+};
 
 int main(int argc, char *argv[]) {
 
@@ -41,7 +72,21 @@ int main(int argc, char *argv[]) {
 
     SDL_RenderPresent(renderer);
 
-    SDL_Delay(5000);
+    SDL_Event e;
+    bool quit = false;
+    while (!quit){
+        while (SDL_PollEvent(&e)){
+            if (e.type == SDL_QUIT){
+                quit = true;
+            }
+            if (e.type == SDL_KEYDOWN){
+                quit = true;
+            }
+            if (e.type == SDL_MOUSEBUTTONDOWN){
+                quit = true;
+            }
+        }
+    }
     
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
