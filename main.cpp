@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include <cmath>
+#include <vector>
 
 typedef float    f32;
 typedef double   f64;
@@ -19,58 +20,46 @@ typedef size_t   usize;
 const int screenWidth = 1024;
 const int screenHeight = 768;
 
-class Vec3 {
-    public:
-        f32 x;
-        f32 y;
-        f32 z;
-        Vec3() {
-            x = 0;
-            y = 0;
-            z = 0;
-        };
-        Vec3(f32 _x, f32 _y, f32 _z) {
-            x = _x;
-            y = _y;
-            z = _z;
-        };
-        void Normalize() {
-            f32 magnitude = sqrtf(x*x + y*y + z*z);
-            x = x/magnitude;
-            y = y/magnitude;
-            z = z/magnitude;
-        };
+struct Vec3 {
+    f32 x;
+    f32 y;
+    f32 z;
 };
-class Triangle {
-    public:
-        Vec3 v1;
-        Vec3 v2;
-        Vec3 v3;
-        
-        Triangle(Vec3& _v1, Vec3& _v2, Vec3& _v3) {
-            v1 = _v1;
-            v2 = _v2;
-            v3 = _v3;
-        };
+struct Triangle {
+    Vec3 v0;
+    Vec3 v1;
+    Vec3 v2;
+};
+Vec3 scalarMultiply(Vec3& vec, f32 f) {
+    Vec3 output;
+    output.x = vec.x * f;
+    output.y = vec.y * f;
+    output.z = vec.z * f;
+    return output;
+};
+Vec3 normalize(Vec3& vec) {
+    f32 magnitude = sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+    return scalarMultiply(vec, magnitude);
+};
+Triangle projectTriangle(Triangle& triangle) {
+    Triangle output;
+    output.v0 = scalarMultiply(triangle.v0, f32(1)/triangle.v0.z);
+    output.v1 = scalarMultiply(triangle.v1, f32(1)/triangle.v1.z);
+    output.v2 = scalarMultiply(triangle.v2, f32(1)/triangle.v2.z);
+    return output;
+};
+Triangle toCameraSpace(Triangle triangle, Vec3 cameraLocation) {
+    Triangle output;
+    f32 transformationMatrix[3][3];
+    return triangle;
+
 };
 
-class Matrix {
-    public:
-        u16 rows;
-        u16 cols;
-        u16 length;
-        f32* data;
-
-        Matrix(u16 _rows, u16 _cols) {
-            rows = _rows;
-            cols = _cols;
-            length = _rows * _cols;
-            data = new f32[length];
-        };
-
-        ~Matrix() {
-            delete[] data;
-        }
+Vec3 matrixMultiply(Vec3 vec, f32 matrix[3][3]) {
+    Vec3 output;
+    output.x = vec.x * matrix[0][0] + vec.y * matrix[1][0] + vec.z * matrix[2][0];
+    output.y = vec.x * matrix[0][1] + vec.y * matrix[1][1] + vec.z * matrix[2][1];
+    output.z = vec.x * matrix[0][2] + vec.y * matrix[1][2] + vec.z * matrix[2][2];
 };
 
 int main(int argc, char *argv[]) {
@@ -80,10 +69,20 @@ int main(int argc, char *argv[]) {
     SDL_Texture* texture;
 
     u32 pixelCount = screenWidth * screenHeight;
-    u32* pixels = (u32*) malloc(pixelCount * sizeof(u32));
+    u32* pixels = new u32[screenWidth*screenHeight];
 
     for (int i = 0; i < pixelCount; i++) {
         pixels[i] = 0;
+    };
+
+    std::vector<Triangle> triangles;
+    std::vector<Triangle> projections;
+
+    triangles.push_back({{1,1,1}, {1,2,1}, {1,1,2}});
+
+    // triangles to canvas space
+    for (Triangle triangle : triangles) {
+        projections.push_back(projectTriangle(triangle));
     };
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -118,6 +117,6 @@ int main(int argc, char *argv[]) {
 
     SDL_Quit();
 
-    free(pixels);
+    delete[] pixels;
     return 0;
 }
