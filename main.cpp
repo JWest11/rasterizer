@@ -52,14 +52,14 @@ class Vec3C {
             output.z = z / scalar;
             return output;
         };
-        Vec3C operator + (Vec3C& vec) {
+        Vec3C operator + (const Vec3C& vec) {
             Vec3C output;
             output.x = vec.x + x;
             output.y = vec.y + y;
             output.z = vec.z + z;
             return output;
         };
-        Vec3C operator - (Vec3C& vec) {
+        Vec3C operator - (const Vec3C& vec) {
             Vec3C output;
             output.x = x - vec.x;
             output.y = y - vec.y;
@@ -75,7 +75,7 @@ class Vec3C {
             output.z = z;
             return output;
         };
-        Vec3C crossProduct(Vec3C& vec) {
+        Vec3C crossProduct(const Vec3C& vec) {
             return Vec3C(z*vec.y-y*vec.z, x*vec.z-z*vec.x, y*vec.x-x*vec.y);
         };
         f32 magnitude() {
@@ -148,7 +148,7 @@ class ColMatrix3 {
                 data[i] = _data[i];
             };
         };
-        Vec3C operator * (Vec3C& vec) {
+        Vec3C operator * (const Vec3C& vec) {
             Vec3C output;
             output.x = vec.x * data[0] + vec.y * data[1] + vec.z * data[2];
             output.y = vec.x * data[3] + vec.y * data[4] + vec.z * data[5];
@@ -198,7 +198,7 @@ class Triangle {
         Vec3C v1;
         Vec3C v2;
 
-        Triangle(Vec3C& _v0, Vec3C& _v1, Vec3C& _v2) {
+        Triangle(const Vec3C& _v0, const Vec3C& _v1, const Vec3C& _v2) {
             v0 = _v0;
             v1 = _v1;
             v2 = _v2;
@@ -319,8 +319,8 @@ class SDL {
 
             SDL_Init(SDL_INIT_VIDEO);
 
-            window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowPixelsX, windowPixelsY, NULL);
-            renderer = SDL_CreateRenderer(window, -1, NULL);
+            window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowPixelsX, windowPixelsY, 0);
+            renderer = SDL_CreateRenderer(window, -1, 0);
             texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, pixelCountX, pixelCountY);
             SDL_UpdateTexture(texture, NULL, pixels, pixelCountX * 4);
             SDL_RenderCopy(renderer, texture, NULL, NULL);
@@ -423,8 +423,6 @@ void printCamera(Camera& camera) {
 
 
 int main(int argc, char *argv[]) {
-
-    
 
     Camera camera = Camera();
 
