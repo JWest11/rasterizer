@@ -295,7 +295,7 @@ class SDL {
         SDL_Renderer* renderer;
         SDL_Texture* texture;
 
-        Camera _camera;
+        Camera& _camera;
 
         int pixelCountX;
         int pixelCountY;
@@ -305,7 +305,7 @@ class SDL {
 
         const int zMax = 10;
 
-        SDL(int _pixelCountX, int _pixelCountY, int windowPixelsX, int windowPixelsY, Camera& cam) {
+        SDL(int _pixelCountX, int _pixelCountY, int windowPixelsX, int windowPixelsY, Camera& cam) : _camera(cam){
             _camera = cam;
             pixelCountX = _pixelCountX;
             pixelCountY = _pixelCountY;
