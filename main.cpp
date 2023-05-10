@@ -337,7 +337,7 @@ class SDL {
             };
         };
 
-        void renderRow(int minX, int maxX, int minY, int maxY, Triangle triangle) {
+        void renderRow(int minX, int maxX, int minY, int maxY, Triangle& triangle) {
             for (int pixelY=minY; pixelY<maxY; pixelY++) {
                 for (int pixelX=minX; pixelX<maxX; pixelX++) {
                     f32 relativeX = f32(pixelX) / f32(pixelCountX);
@@ -367,14 +367,14 @@ class SDL {
             int maxX = boundingRect.x1 * pixelCountX <= pixelCountX ? boundingRect.x1 * pixelCountX : pixelCountX;
             int maxY = boundingRect.y1 * pixelCountY <= pixelCountY ? boundingRect.y1 * pixelCountY : pixelCountY;
 
-            std::thread t1 = std::thread(&SDL::renderRow, this, minX, maxX, minY, maxY/8, triangle);
-            std::thread t2 = std::thread(&SDL::renderRow, this, minX, maxX, maxY/8, maxY/4, triangle);
-            std::thread t3 = std::thread(&SDL::renderRow, this, minX, maxX, maxY/4, maxY*3/8, triangle);
-            std::thread t4 = std::thread(&SDL::renderRow, this, minX, maxX, maxY*3/8, maxY/2, triangle);
-            std::thread t5 = std::thread(&SDL::renderRow, this, minX, maxX, maxY/2, maxY*5/8, triangle);
-            std::thread t6 = std::thread(&SDL::renderRow, this, minX, maxX, maxY*5/8, maxY*3/4, triangle);
-            std::thread t7 = std::thread(&SDL::renderRow, this, minX, maxX, maxY*3/4, maxY*7/8, triangle);
-            std::thread t8 = std::thread(&SDL::renderRow, this, minX, maxX, maxY*7/8, maxY, triangle);
+            std::thread t1 = std::thread(&SDL::renderRow, this, minX, maxX, minY, maxY/8, std::ref(triangle));
+            std::thread t2 = std::thread(&SDL::renderRow, this, minX, maxX, maxY/8, maxY/4, std::ref(triangle));
+            std::thread t3 = std::thread(&SDL::renderRow, this, minX, maxX, maxY/4, maxY*3/8, std::ref(triangle));
+            std::thread t4 = std::thread(&SDL::renderRow, this, minX, maxX, maxY*3/8, maxY/2, std::ref(triangle));
+            std::thread t5 = std::thread(&SDL::renderRow, this, minX, maxX, maxY/2, maxY*5/8, std::ref(triangle));
+            std::thread t6 = std::thread(&SDL::renderRow, this, minX, maxX, maxY*5/8, maxY*3/4, std::ref(triangle));
+            std::thread t7 = std::thread(&SDL::renderRow, this, minX, maxX, maxY*3/4, maxY*7/8, std::ref(triangle));
+            std::thread t8 = std::thread(&SDL::renderRow, this, minX, maxX, maxY*7/8, maxY, std::ref(triangle));
 
             t1.join();
             t2.join();

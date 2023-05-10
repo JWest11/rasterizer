@@ -2,7 +2,6 @@
     "name": "scratchfps",
     "version": "1.0",
     "dependencies": [
-        "sdl2",
-        "eigen3"
+        "sdl2"
     ]
 }

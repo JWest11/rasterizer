@@ -4,7 +4,7 @@ project(scratchfps VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
-add_executable(scratchfps main.cpp)
+add_executable(rasterizer main.cpp)
 
 find_package(SDL2 CONFIG REQUIRED)
 target_link_libraries(scratchfps
