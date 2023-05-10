@@ -7,7 +7,7 @@ enable_testing()
 add_executable(rasterizer main.cpp)
 
 find_package(SDL2 CONFIG REQUIRED)
-target_link_libraries(scratchfps
+target_link_libraries(rasterizer
     PRIVATE
     $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
     $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>

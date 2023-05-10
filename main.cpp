@@ -104,7 +104,7 @@ class Vec3P {
             theta = _theta;
             phi = _phi;
         };
-        Vec3C toVec3C() {
+        Vec3C toVec3C() const {
             Vec3C output;
             output.y = r * cos(theta);
             output.x = r * sin(theta) * sin(phi);
@@ -114,7 +114,7 @@ class Vec3P {
     
 };
 void printVector(Vec3C& vec) {
-    std::cout << vec.x << " " << vec.y << " " << vec.z << std::endl;
+    std::cout << vec.x << " " << vec.y << " " << vec.z << "\n";
 };
 
 f32 min3(f32 a, f32 b, f32 c) {
@@ -194,6 +194,9 @@ Vec3C normalizeVecToCameraCanvas(Vec3C& vec, Camera& camera) {
 };
 class Triangle {
     public:
+
+        u32 surfaceColor = 0xFFFFFFFF;
+
         Vec3C v0;
         Vec3C v1;
         Vec3C v2;
@@ -203,10 +206,17 @@ class Triangle {
             v1 = _v1;
             v2 = _v2;
         };
+        Triangle(const Vec3C& _v0, const Vec3C& _v1, const Vec3C& _v2, u32 color) {
+            surfaceColor = color;
+            v0 = _v0;
+            v1 = _v1;
+            v2 = _v2;
+        };
         Triangle() {
         };
         Triangle normalize() {
-            Triangle output;
+            Triangle output = *this;
+            output.surfaceColor = surfaceColor;
             output.v0 = v0.normalize();
             output.v1 = v1.normalize();
             output.v2 = v2.normalize();
@@ -221,7 +231,7 @@ class Triangle {
             return output;
         };
         Triangle toCameraSpace(ColMatrix3& cameraMatrix, Vec3C& cameraPosition) {
-            Triangle output;
+            Triangle output = *this;
             output.v0 = cameraMatrix * (v0 - cameraPosition);
             output.v1 = cameraMatrix * (v1 - cameraPosition);
             output.v2 = cameraMatrix * (v2 - cameraPosition);
@@ -229,10 +239,11 @@ class Triangle {
             
         };
         Triangle toRasterSpace() {
-            Triangle output;
+            Triangle output = *this;
             output.v0 = v0.perspectiveDivide();
             output.v1 = v1.perspectiveDivide();
             output.v2 = v2.perspectiveDivide();
+            output.surfaceColor = surfaceColor;
             return output;
         };
         bool rasterTriangleIsVisible(Camera& camera) {
@@ -247,10 +258,11 @@ class Triangle {
             return true;
         };
         Triangle normalizeToCameraCanvas(Camera& camera) {
-            Triangle output;
+            Triangle output = *this;
             output.v0 = normalizeVecToCameraCanvas(v0, camera);
             output.v1 = normalizeVecToCameraCanvas(v1, camera);
             output.v2 = normalizeVecToCameraCanvas(v2, camera);
+            output.surfaceColor = surfaceColor;
             return output;
         };
         BarycentricCoordinates getBarycentricCoordinates(Vec3C& point) {
@@ -263,8 +275,8 @@ class Triangle {
             output.lambda2 = A2 / (A0 + A1 + A2);
             return output;
         };
-        Triangle rasterToCameraSpace(Camera& camera) {
-            Triangle output;
+        Triangle rasterToCameraSpace(const Camera& camera) {
+            Triangle output = *this;
             f32 zCamera = camera.position.z;
             output.v0.x = v0.x * zCamera;
             output.v0.y = v0.y * zCamera;
@@ -275,6 +287,7 @@ class Triangle {
             output.v2.x = v2.x * zCamera;
             output.v2.y = v2.y * zCamera;
             output.v2.z = v2.z;
+            output.surfaceColor = surfaceColor;
             return output;
         };
 };
@@ -303,7 +316,7 @@ class SDL {
         u32* pixels;
         f32* pixelZBuffer;
 
-        const int zMax = 10;
+        const int zMax = 40;
 
         SDL(int _pixelCountX, int _pixelCountY, int windowPixelsX, int windowPixelsY, Camera& cam) : _camera(cam){
             _camera = cam;
@@ -319,7 +332,7 @@ class SDL {
 
             SDL_Init(SDL_INIT_VIDEO);
 
-            window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowPixelsX, windowPixelsY, 0);
+            window = SDL_CreateWindow("Rasterizer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowPixelsX, windowPixelsY, 0);
             renderer = SDL_CreateRenderer(window, -1, 0);
             texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, pixelCountX, pixelCountY);
             SDL_UpdateTexture(texture, NULL, pixels, pixelCountX * 4);
@@ -351,7 +364,7 @@ class SDL {
                     if (zPixel > pixelZBuffer[pixelIndex]) { continue; };
 
                     if (zPixel > 0.2 && triangle.pixelIsBounded(relativePixel)) {
-                        u32 inputVal = 0x0000FFFF;
+                        u32 inputVal = triangle.surfaceColor;
                         pixels[pixelIndex] = inputVal;
                         pixelZBuffer[pixelIndex] = zPixel;
                     };
@@ -418,7 +431,7 @@ void printCamera(Camera& camera) {
     std::cout << "position:";
     printVector(camera.position);
     std::cout << "orientation:";
-    std::cout << "theta: " << camera.orientation.theta/PI << " " << "phi: " << camera.orientation.phi/PI << std::endl;
+    std::cout << "theta: " << camera.orientation.theta/PI << " " << "phi: " << camera.orientation.phi/PI << "\n";
 };
 
 
@@ -432,8 +445,9 @@ int main(int argc, char *argv[]) {
     std::vector<Triangle> trianglesCameraSpace;
     std::vector<Triangle> trianglesRasterSpace;
 
-    Triangle input = Triangle(Vec3C(0,1,4),Vec3C(0,0,4),Vec3C(1,0,4));
+    Triangle input = Triangle(Vec3C(0,1,4),Vec3C(0,0,4),Vec3C(1,0,4), 0xFF0000FF);
     trianglesWorldSpace.push_back(input);
+    trianglesWorldSpace.push_back(Triangle(Vec3C(2,-1,10),Vec3C(-3,-1,11),Vec3C(-8,-2,12), 0x00FFFFFF));
 
 
     SDL_Event e;
